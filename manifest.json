@@ -1,6 +1,6 @@
 {
   "name": "Idavad Book",
-  "short_name": "Contribution",
+  "short_name": "Idavad Book",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f4f4",
