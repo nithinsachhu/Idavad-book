@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contribution App</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#161616">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --cds-interactive: #0f62fe;
+            --cds-ui-background: #f4f4f4;
+            --cds-layer: #ffffff;
+            --cds-text-primary: #161616;
+            --cds-text-secondary: #525252;
+            --cds-border-subtle: #e0e0e0;
+            --returned-bg: #fff1f1;
+            --returned-text: #a2191f;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--cds-ui-background);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--cds-text-primary);
+            overflow: hidden;
+        }
+
+        .app-bar {
+            background: #161616;
+            color: white;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #393939;
+            flex-shrink: 0;
+        }
+
+        .app-bar h2 { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+        .app-total {
+            background: #262626;
+            padding: 4px 10px;
+            border-left: 3px solid var(--cds-interactive);
+            display: flex;
+            flex-direction: column;
+        }
+        .app-total span { font-size: 9px; text-transform: uppercase; color: #c6c6c6; }
+        .app-total h1 { font-size: 13px; color: #ffffff; font-weight: 600; }
+
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--cds-layer);
+            padding-bottom: 65px;
+        }
+
+        .tab-view { display: none; }
+        .tab-view.active { display: block; }
+
+        .controls-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .search-field { flex: 2; position: relative; }
+        .status-field { flex: 1.2; position: relative; }
+        .controls-row input, .controls-row select {
+            width: 100%;
+            padding: 8px 8px 8px 30px;
+            border: 1px solid var(--cds-border-subtle);
+            font-size: 12px;
+            background: #f4f4f4;
+            color: var(--cds-text-primary);
+            outline: none;
+            border-radius: 4px;
+        }
+        .search-field i, .status-field i {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            color: var(--cds-text-secondary); font-size: 12px;
+        }
+
+        .table-wrap {
+            border: 1px solid var(--cds-border-subtle);
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 280px; }
+        th, td { padding: 10px 10px; }
+        th {
+            background-color: #f4f4f4;
+            color: var(--cds-text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid var(--cds-border-subtle);
+            z-index: 5;
+        }
+        td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
+        
+        .name-text {
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #111;
+        }
+
+        .amount-tag {
+            background: #e0f0ff;
+            color: #0043ce;
+            padding: 3px 6px;
+            font-weight: 600;
+            font-size: 12px !important;
+            border-radius: 4px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        tr.is-returned td {
+            background-color: var(--returned-bg) !important;
+            color: var(--returned-text);
+        }
+        tr.is-returned .name-text { color: #a2191f; }
+        tr.is-returned .amount-tag { background: #ffd7d9; color: #750e13; }
+
+        .th-sort { display: inline-flex; align-items: center; gap: 3px; position: relative; cursor: pointer; }
+        .sort-pop {
+            display: none; position: absolute; left: 0; top: 100%; background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--cds-border-subtle);
+            z-index: 20; min-width: 120px; border-radius: 4px;
+        }
+        .sort-pop button {
+            width: 100%; padding: 8px; text-align: left; background: none; border: none;
+            font-size: 11px; cursor: pointer; color: var(--cds-text-primary);
+        }
+        .sort-pop button:hover { background: #f4f4f4; color: var(--cds-interactive); }
+
+        .menu-box { position: relative; display: inline-block; }
+        .dots-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--cds-text-secondary); font-size: 14px; }
+        
+        .action-drop {
+            display: none; position: absolute; right: 0; bottom: 100%; background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--cds-border-subtle);
+            z-index: 10; min-width: 130px; border-radius: 4px; margin-bottom: 2px;
+        }
+        .action-drop button {
+            width: 100%; padding: 8px; text-align: left; background: none; border: none;
+            font-size: 11px; cursor: pointer; color: var(--cds-text-primary);
+        }
+        .action-drop button:hover { background: #f4f4f4; }
+
+        .cards-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .b-card {
+            background: #fcfcfc;
+            padding: 12px;
+            border: 1px solid var(--cds-border-subtle);
+            border-left: 4px solid var(--cds-interactive);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .b-card h4 { font-size: 15px; color: var(--cds-interactive); margin-bottom: 2px; font-weight: 600; }
+        .b-card .c-info { font-size: 11px; color: var(--cds-text-secondary); margin-bottom: 2px; }
+        .b-card .c-sub { font-size: 13px; font-weight: 600; color: var(--cds-text-primary); }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: 55px;
+            background: #161616;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #393939;
+            z-index: 50;
+        }
+
+        .nav-item {
+            flex: 1;
+            height: 100%;
+            background: none;
+            border: none;
+            color: #8d8d8d;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .nav-item i { font-size: 15px; }
+        .nav-item.active { color: #ffffff; border-top: 2px solid var(--cds-interactive); }
+
+        .app-modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center; align-items: flex-end;
+        }
+        .modal-sheet {
+            background: #ffffff; width: 100%; max-height: 75vh;
+            border-top-left-radius: 14px; border-top-right-radius: 14px;
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .modal-head {
+            background: #161616; color: white; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; font-weight: 500;
+        }
+        .modal-close { background: none; border: none; font-size: 15px; color: white; cursor: pointer; }
+        .modal-body { padding: 10px; overflow-y: auto; }
+        .no-msg { text-align: center; color: var(--cds-text-secondary); padding: 25px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-bar">
+        <h2><i class="fa-solid fa-wallet"></i> Contribution</h2>
+        <div class="app-total">
+            <span>Total</span>
+            <h1 id="grantTotalDisplay">₹0</h1>
+        </div>
+    </div>
+
+    <div class="app-content">
+        <div id="listTab" class="tab-view active">
+            <div class="controls-row">
+                <div class="search-field">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchName" placeholder="Search..." oninput="applyFilters()">
+                </div>
+                <div class="status-field">
+                    <i class="fa-solid fa-filter"></i>
+                    <select id="statusFilter" onchange="applyFilters()">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">#</th>
+                            <th>
+                                <div class="th-sort" onclick="toggleSortPop(event, 'namePop')">
+                                    NAME <i class="fa-solid fa-sort" style="font-size:8px;"></i>
+                                </div>
+                                <div class="sort-pop" id="namePop">
+                                    <button onclick="setSort('name', 'atoz')">A to Z</button>
+                                    <button onclick="setSort('name', 'ztoa')">Z to A</button>
+                                    <button onclick="setSort('name', 'none')">Default</button>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-sort" onclick="toggleSortPop(event, 'amtPop')">
+                                    AMT <i class="fa-solid fa-sort" style="font-size:8px;"></i>
+                                </div>
+                                <div class="sort-pop" id="amtPop">
+                                    <button onclick="setSort('amount', 'lowtohigh')">Low to High</button>
+                                    <button onclick="setSort('amount', 'hightolow')">High to Low</button>
+                                    <button onclick="setSort('amount', 'none')">Default</button>
+                                </div>
+                            </th>
+                            <th style="width: 35px; text-align: right;">ACT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="4" class="no-msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="graphTab" class="tab-view">
+            <div style="margin-bottom: 8px;">
+                <p style="font-size: 11px; color: var(--cds-text-secondary);">Tap a box to view contributors</p>
+            </div>
+            <div id="breakdownContainer" class="cards-grid"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('listTab', this)">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>Entries</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('graphTab', this)">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Breakdown</span>
+        </button>
+    </div>
+
+    <div id="contributorsModal" class="app-modal" onclick="closeModal(event)">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <span id="modalTitle">Contributors</span>
+                <button class="modal-close" onclick="closeModalButton()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtvGNH_sZ9ekSzB1SS0rjo1m-uGPCcisyG8Nh6q8Lr-M-6wx3Fk-PaTyANMlIzGc4_bQ/exec";
+
+    let allEntries = [];
+    let curNameSort = 'none';
+    let curAmtSort = 'none';
+
+    window.addEventListener('DOMContentLoaded', fetchData);
+
+    function fetchData() {
+        fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    document.getElementById('grantTotalDisplay').innerText = '₹' + data.totalAmount.toLocaleString();
+                    allEntries = data.entries;
+                    applyFilters();
+                    generateCards(allEntries);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" class="no-msg" style="color:red;">Error loading data.</td></tr>';
+            });
+    }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function toggleSortPop(e, popId) {
+        e.stopPropagation();
+        document.querySelectorAll('.sort-pop').forEach(p => { if(p.id !== popId) p.style.display = 'none'; });
+        let pop = document.getElementById(popId);
+        pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
+    }
+
+    window.addEventListener('click', () => {
+        document.querySelectorAll('.sort-pop').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.action-drop').forEach(m => m.style.display = 'none');
+    });
+
+    function setSort(type, order) {
+        if(type === 'name') { curNameSort = order; curAmtSort = 'none'; }
+        else { curAmtSort = order; curNameSort = 'none'; }
+        applyFilters();
+    }
+
+    function applyFilters() {
+        let list = [...allEntries];
+        let status = document.getElementById('statusFilter').value;
+        
+        if(status === 'active') list = list.filter(e => e.status !== "Returned");
+        if(status === 'returned') list = list.filter(e => e.status === "Returned");
+
+        let q = document.getElementById('searchName').value.toLowerCase().trim();
+        if(q) list = list.filter(e => e.name.toLowerCase().includes(q));
+
+        if(curNameSort === 'atoz') list.sort((a,b) => a.name.localeCompare(b.name));
+        if(curNameSort === 'ztoa') list.sort((a,b) => b.name.localeCompare(a.name));
+        if(curAmtSort === 'lowtohigh') list.sort((a,b) => a.amount - b.amount);
+        if(curAmtSort === 'hightolow') list.sort((a,b) => b.amount - a.amount);
+
+        renderTable(list);
+    }
+
+    function renderTable(list) {
+        let tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        if(list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="no-msg">No entries found</td></tr>';
+            return;
+        }
+        list.forEach((item, idx) => {
+            let ret = item.status === "Returned";
+            let tr = document.createElement('tr');
+            if(ret) tr.className = 'is-returned';
+            tr.innerHTML = `
+                <td style="color:var(--cds-text-secondary);">${idx + 1}</td>
+                <td>
+                    <span class="name-text">${item.name}</span>
+                    ${ret ? '<br><span style="font-size:9px; background:#ffd7d9; color:#750e13; padding:1px 4px; font-weight:600; border-radius:2px;">Returned</span>' : ''}
+                </td>
+                <td><span class="amount-tag">₹${item.amount.toLocaleString()}</span></td>
+                <td style="text-align:right;">
+                    <div class="menu-box">
+                        <button class="dots-btn" onclick="toggleMenu(event, ${item.rowIndex})"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        <div class="action-drop" id="menu-${item.rowIndex}">
+                            <button onclick="updateStatus(${item.rowIndex}, '${ret ? 'Active' : 'Returned'}')">
+                                <i class="fa-solid ${ret ? 'fa-rotate-left' : 'fa-money-bill-wave'}"></i> ${ret ? 'Unmark Active' : 'Mark Returned'}
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function toggleMenu(e, rIdx) {
+        e.stopPropagation();
+        document.querySelectorAll('.action-drop').forEach(m => { if(m.id !== `menu-${rIdx}`) m.style.display = 'none'; });
+        let m = document.getElementById(`menu-${rIdx}`);
+        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+    }
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('data:text/javascript;base64,').catch(() => {});
+        });
+    }
+
+    function updateStatus(rIdx, newSt) {
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "updateStatus", rowIndex: rIdx, status: newSt })
+        }).then(res => res.json()).then(res => {
+            if(res.status === 'success') fetchData();
+            else alert('Failed to update.');
+        });
+    }
+
+    function generateCards(list) {
+        let stats = {};
+        list.forEach(e => {
+            if(e.status !== "Returned") {
+                if(!stats[e.amount]) stats[e.amount] = [];
+                stats[e.amount].push(e.name);
+            }
+        });
+
+        let amts = Object.keys(stats).sort((a,b) => Number(b) - Number(a));
+        let ctn = document.getElementById('breakdownContainer');
+        ctn.innerHTML = '';
+
+        if(amts.length === 0) {
+            ctn.innerHTML = '<div class="no-msg">No data available</div>';
+            return;
+        }
+
+        amts.forEach(amt => {
+            let names = stats[amt];
+            let card = document.createElement('div');
+            card.className = 'b-card';
+            card.onclick = () => openModal(amt, names);
+            card.innerHTML = `
+                <h4>₹${Number(amt).toLocaleString()}</h4>
+                <div class="c-info"><i class="fa-solid fa-users"></i> ${names.length} people</div>
+                <div class="c-sub">Subtotal: ₹${(Number(amt) * names.length).toLocaleString()}</div>
+            `;
+            ctn.appendChild(card);
+        });
+    }
+
+    function openModal(amt, names) {
+        document.getElementById('modalTitle').innerText = `₹${Number(amt).toLocaleString()} (${names.length} people)`;
+        let body = document.getElementById('modalBody');
+        body.innerHTML = '';
+        names.forEach((n, i) => {
+            let row = document.createElement('div');
+            row.style.cssText = "padding:6px 0; border-bottom:1px solid #eee; font-size:12px; display:flex; justify-content:space-between;";
+            row.innerHTML = `<span style="font-weight:500;">${i+1}. ${n}</span><strong style="color:var(--cds-interactive);">₹${Number(amt).toLocaleString()}</strong>`;
+            body.appendChild(row);
+        });
+        document.getElementById('contributorsModal').style.display = 'flex';
+    }
+
+    function closeModalButton() { document.getElementById('contributorsModal').style.display = 'none'; }
+    function closeModal(e) { if(e.target.id === 'contributorsModal') closeModalButton(); }
+</script>
+
+</body>
+</html>
