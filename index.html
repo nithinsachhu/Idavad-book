@@ -70,13 +70,12 @@
         .controls-row {
             display: flex;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
             position: sticky;
             top: 0;
             background: #ffffff;
             z-index: 100;
-            padding-top: 8px;
-            padding-bottom: 8px;
+            padding: 8px;
         }
         .search-field { flex: 1; position: relative; }
         .controls-row input {
@@ -103,6 +102,8 @@
 
         table { width: 100%; border-collapse: collapse; text-align: left; min-width: 280px; }
         th, td { padding: 10px 8px; }
+        
+        /* ടേബിൾ ഹെഡിംഗ് സെർച്ച് ബോക്സിന് തൊട്ടുകീഴിൽ സ്റ്റാറ്റിക് ആയി നിൽക്കാൻ */
         th {
             background-color: #f4f4f4;
             color: var(--cds-text-secondary);
@@ -110,13 +111,13 @@
             text-transform: uppercase;
             font-size: 10px;
             position: sticky;
-            top: 53;
+            top: 54px; /* സെർച്ച് ബോക്സിന്റെ ഹൈറ്റിന് അനുസരിച്ച് കൃത്യമായി ഫിറ്റ് ചെയ്യാൻ */
             border-bottom: 1px solid var(--cds-border-subtle);
-            z-index: 5;
+            z-index: 90;
         }
         td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
         
-        /* Numbering aligned left with proper equal spacing */
+        /* നമ്പറിംഗും പേരും തമ്മിലുള്ള അകലം കൃത്യമായി ക്രമീകരിച്ചിരിക്കുന്നു */
         .num-col {
             width: 35px;
             font-size: 13px !important;
@@ -155,7 +156,7 @@
         .sort-pop {
             display: none; position: absolute; left: 0; top: 100%; background: #fff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--cds-border-subtle);
-            z-index: 20; min-width: 120px; border-radius: 4px;
+            z-index: 120; min-width: 120px; border-radius: 4px;
         }
         .sort-pop button {
             width: 100%; padding: 8px; text-align: left; background: none; border: none;
@@ -169,7 +170,7 @@
         .action-drop {
             display: none; position: absolute; right: 0; bottom: 100%; background: #ffffff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--cds-border-subtle);
-            z-index: 10; min-width: 130px; border-radius: 4px; margin-bottom: 2px;
+            z-index: 120; min-width: 130px; border-radius: 4px; margin-bottom: 2px;
         }
         .action-drop button {
             width: 100%; padding: 8px; text-align: left; background: none; border: none;
@@ -199,7 +200,7 @@
             justify-content: space-around;
             align-items: center;
             border-top: 1px solid #393939;
-            z-index: 50;
+            z-index: 150;
         }
 
         .nav-item {
@@ -220,7 +221,7 @@
         .nav-item.active { color: #ffffff; border-top: 2px solid var(--cds-interactive); }
 
         .app-modal {
-            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6);
             justify-content: center; align-items: flex-end;
         }
