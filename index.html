@@ -66,17 +66,17 @@
         .tab-view { display: none; }
         .tab-view.active { display: block; }
 
+        /* സെർച്ച് ബോക്സ് സ്റ്റാറ്റിക് ആക്കാൻ */
         .controls-row {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
             position: sticky;
             top: 0;
-            background: #ffffff; /* ലിസ്റ്റിലെ പേരുകൾ പിന്നിൽ ഒളിച്ചുപോകാതിരിക്കാൻ */
-            z-index: 100;        /* പേരുകൾക്ക് മുകളിൽ തന്നെ നിൽക്കാൻ ഇത് സഹായിക്കും */
+            background: #ffffff;
+            z-index: 100;
             padding-top: 8px;
             padding-bottom: 8px;
-            box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* ചെറിയൊരു നിഴൽ കൂടി നൽകിയാൽ കാണാൻ കൂടുതൽ ഭംഗിയായിരിക്കും */
         }
         .search-field { flex: 1; position: relative; }
         .controls-row input {
