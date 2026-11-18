@@ -424,13 +424,41 @@
     
 
     function updateStatus(rIdx, newSt) {
+        // 1. ക്ലിക്ക് ചെയ്ത ഉടൻ UI-ൽ മാറ്റം വരുത്താൻ (Instant visual feedback)
+        let entry = allEntries.find(e => e.rowIndex === rIdx);
+        if(entry) {
+            entry.status = newSt;
+            applyFilters(); // ടേബിൾ ഉടൻ റിഫ്രഷ് ചെയ്യും
+        }
+
+        // 2. ബാക്ക്ഗ്രൗണ്ടിൽ ഗൂഗിൾ ഷീറ്റിലേക്ക് ഡാറ്റ അയക്കുക
         fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "updateStatus", rowIndex: rIdx, status: newSt })
         }).then(res => res.json()).then(res => {
-            if(res.status === 'success') fetchData();
-            else alert('Failed to update.');
+            if(res.status === 'success') {
+                fetchDataSilent(); // സൈലന്റായി ടോട്ടൽ സിങ്ക് ചെയ്യും
+            } else {
+                alert('Failed to update in sheet.');
+                fetchData(); // പിഴവ് വന്നാൽ പഴയ ഡാറ്റ തിരിച്ചെടുക്കും
+            }
+        }).catch(err => {
+            console.error(err);
+            alert('Network error.');
         });
+    }
+
+    // ലോഡിംഗ് കാണിക്കാതെ സൈലന്റായി ഡാറ്റ ഫെച്ച് ചെയ്യാൻ
+    function fetchDataSilent() {
+        fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    document.getElementById('grantTotalDisplay').innerText = '₹' + data.totalAmount.toLocaleString();
+                    allEntries = data.entries;
+                    generateCards(allEntries);
+                }
+            });
     }
 
     function generateCards(list) {
