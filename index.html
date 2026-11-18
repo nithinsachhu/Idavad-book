@@ -66,16 +66,17 @@
         .tab-view { display: none; }
         .tab-view.active { display: block; }
 
+        /* Search Box Height Increased & Static */
         .controls-row {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
         }
-        .search-field { flex: 2; position: relative; }
-        .status-field { flex: 1.2; position: relative; }
-        .controls-row input, .controls-row select {
+        .search-field { flex: 1; position: relative; }
+        .controls-row input {
             width: 100%;
-            padding: 8px 8px 8px 30px;
+            height: 38px; /* Height increased */
+            padding: 0px 8px 0px 32px;
             border: 1px solid var(--cds-border-subtle);
             font-size: 12px;
             background: #f4f4f4;
@@ -83,7 +84,7 @@
             outline: none;
             border-radius: 4px;
         }
-        .search-field i, .status-field i {
+        .search-field i {
             position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
             color: var(--cds-text-secondary); font-size: 12px;
         }
@@ -95,7 +96,7 @@
         }
 
         table { width: 100%; border-collapse: collapse; text-align: left; min-width: 280px; }
-        th, td { padding: 10px 10px; }
+        th, td { padding: 10px 8px; }
         th {
             background-color: #f4f4f4;
             color: var(--cds-text-secondary);
@@ -109,6 +110,16 @@
         }
         td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
         
+        /* Numbering font size same as name, reduced gap */
+        .num-col {
+            width: 28px;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: var(--cds-text-secondary);
+            text-align: right;
+            padding-right: 4px !important;
+        }
+
         .name-text {
             font-size: 13px !important;
             font-weight: 500 !important;
@@ -130,6 +141,7 @@
             background-color: var(--returned-bg) !important;
             color: var(--returned-text);
         }
+        tr.is-returned .num-col { color: #a2191f; }
         tr.is-returned .name-text { color: #a2191f; }
         tr.is-returned .amount-tag { background: #ffd7d9; color: #750e13; }
 
@@ -223,7 +235,7 @@
 <body>
 
     <div class="app-bar">
-        <h2><i class="fa-solid fa-wallet"></i> Idavad Book </h2>
+        <h2><img src="https://cdn-icons-png.flaticon.com/512/6397/6397999.png" width="18" height="18" style="vertical-align: middle;"> Idavad Book</h2>
         <div class="app-total">
             <span>Total</span>
             <h1 id="grantTotalDisplay">₹0</h1>
@@ -232,18 +244,11 @@
 
     <div class="app-content">
         <div id="listTab" class="tab-view active">
+            <!-- Filter removed, Search expanded -->
             <div class="controls-row">
                 <div class="search-field">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchName" placeholder="Search..." oninput="applyFilters()">
-                </div>
-                <div class="status-field">
-                    <i class="fa-solid fa-filter"></i>
-                    <select id="statusFilter" onchange="applyFilters()">
-                        <option value="all">All</option>
-                        <option value="active">Active</option>
-                        <option value="returned">Returned</option>
-                    </select>
+                    <input type="text" id="searchName" placeholder="Search contributor..." oninput="applyFilters()">
                 </div>
             </div>
 
@@ -251,7 +256,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 30px;">#</th>
+                            <th style="width: 28px; text-align: right;">#</th>
                             <th>
                                 <div class="th-sort" onclick="toggleSortPop(event, 'namePop')">
                                     NAME <i class="fa-solid fa-sort" style="font-size:8px;"></i>
@@ -272,7 +277,7 @@
                                     <button onclick="setSort('amount', 'none')">Default</button>
                                 </div>
                             </th>
-                            <th style="width: 35px; text-align: right;">ACT</th>
+                            <th style="width: 35px; text-align: right;"><i class="fa-solid fa-bolt" title="Actions"></i></th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -312,7 +317,7 @@
     </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtvGNH_sZ9ekSzB1SS0rjo1m-uGPCcisyG8Nh6q8Lr-M-6wx3Fk-PaTyANMlIzGc4_bQ/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtvGNH_sZ9ekSzB1SS0rjo1m-uGPCcisyG8Nh6q8Lr-M-6wx3Fk-PaTyANMlIzGc4_bQ/exec"; // Replace with your actual URL if needed
 
     let allEntries = [];
     let curNameSort = 'none';
@@ -365,11 +370,7 @@
 
     function applyFilters() {
         let list = [...allEntries];
-        let status = document.getElementById('statusFilter').value;
         
-        if(status === 'active') list = list.filter(e => e.status !== "Returned");
-        if(status === 'returned') list = list.filter(e => e.status === "Returned");
-
         let q = document.getElementById('searchName').value.toLowerCase().trim();
         if(q) list = list.filter(e => e.name.toLowerCase().includes(q));
 
@@ -393,7 +394,7 @@
             let tr = document.createElement('tr');
             if(ret) tr.className = 'is-returned';
             tr.innerHTML = `
-                <td style="color:var(--cds-text-secondary);">${idx + 1}</td>
+                <td class="num-col">${idx + 1}</td>
                 <td>
                     <span class="name-text">${item.name}</span>
                     ${ret ? '<br><span style="font-size:9px; background:#ffd7d9; color:#750e13; padding:1px 4px; font-weight:600; border-radius:2px;">Returned</span>' : ''}
@@ -421,26 +422,22 @@
         m.style.display = m.style.display === 'block' ? 'none' : 'block';
     }
 
-    
-
     function updateStatus(rIdx, newSt) {
-        // 1. ക്ലിക്ക് ചെയ്ത ഉടൻ UI-ൽ മാറ്റം വരുത്താൻ (Instant visual feedback)
         let entry = allEntries.find(e => e.rowIndex === rIdx);
         if(entry) {
             entry.status = newSt;
-            applyFilters(); // ടേബിൾ ഉടൻ റിഫ്രഷ് ചെയ്യും
+            applyFilters();
         }
 
-        // 2. ബാക്ക്ഗ്രൗണ്ടിൽ ഗൂഗിൾ ഷീറ്റിലേക്ക് ഡാറ്റ അയക്കുക
         fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({ action: "updateStatus", rowIndex: rIdx, status: newSt })
         }).then(res => res.json()).then(res => {
             if(res.status === 'success') {
-                fetchDataSilent(); // സൈലന്റായി ടോട്ടൽ സിങ്ക് ചെയ്യും
+                fetchDataSilent();
             } else {
                 alert('Failed to update in sheet.');
-                fetchData(); // പിഴവ് വന്നാൽ പഴയ ഡാറ്റ തിരിച്ചെടുക്കും
+                fetchData();
             }
         }).catch(err => {
             console.error(err);
@@ -448,7 +445,6 @@
         });
     }
 
-    // ലോഡിംഗ് കാണിക്കാതെ സൈലന്റായി ഡാറ്റ ഫെച്ച് ചെയ്യാൻ
     function fetchDataSilent() {
         fetch(WEB_APP_URL)
             .then(res => res.json())
