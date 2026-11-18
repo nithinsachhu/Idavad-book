@@ -1,5 +1,5 @@
 {
-  "name": "Contribution App",
+  "name": "Idavad Book",
   "short_name": "Contribution",
   "start_url": "./index.html",
   "display": "standalone",
@@ -7,7 +7,7 @@
   "theme_color": "#161616",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/6397/6397999.png",
       "sizes": "512x512",
       "type": "image/png"
     }
