@@ -66,10 +66,15 @@
         .tab-view { display: none; }
         .tab-view.active { display: block; }
 
-        .controls-row {
+       .controls-row {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background: var(--cds-layer);
+            z-index: 10;
+            padding-bottom: 6px;
         }
         .search-field { flex: 1; position: relative; }
         .controls-row input {
