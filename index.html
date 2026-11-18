@@ -66,7 +66,6 @@
         .tab-view { display: none; }
         .tab-view.active { display: block; }
 
-        /* Search Box Height Increased & Static */
         .controls-row {
             display: flex;
             gap: 8px;
@@ -75,7 +74,7 @@
         .search-field { flex: 1; position: relative; }
         .controls-row input {
             width: 100%;
-            height: 38px; /* Height increased */
+            height: 38px;
             padding: 0px 8px 0px 32px;
             border: 1px solid var(--cds-border-subtle);
             font-size: 12px;
@@ -110,14 +109,14 @@
         }
         td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
         
-        /* Numbering font size same as name, reduced gap */
+        /* Numbering aligned left with proper equal spacing */
         .num-col {
-            width: 28px;
+            width: 35px;
             font-size: 13px !important;
             font-weight: 500 !important;
             color: var(--cds-text-secondary);
-            text-align: right;
-            padding-right: 4px !important;
+            text-align: left;
+            padding-left: 10px !important;
         }
 
         .name-text {
@@ -244,7 +243,6 @@
 
     <div class="app-content">
         <div id="listTab" class="tab-view active">
-            <!-- Filter removed, Search expanded -->
             <div class="controls-row">
                 <div class="search-field">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -256,7 +254,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 28px; text-align: right;">#</th>
+                            <th style="width: 35px; padding-left: 10px;">#</th>
                             <th>
                                 <div class="th-sort" onclick="toggleSortPop(event, 'namePop')">
                                     NAME <i class="fa-solid fa-sort" style="font-size:8px;"></i>
@@ -277,7 +275,16 @@
                                     <button onclick="setSort('amount', 'none')">Default</button>
                                 </div>
                             </th>
-                            <th style="width: 35px; text-align: right;"><i class="fa-solid fa-bolt" title="Actions"></i></th>
+                            <th style="width: 40px; text-align: right;">
+                                <div class="th-sort" onclick="toggleSortPop(event, 'actPop')" style="justify-content: flex-end;">
+                                    <i class="fa-solid fa-filter" style="font-size:10px;"></i>
+                                </div>
+                                <div class="sort-pop" id="actPop" style="left: auto; right: 0;">
+                                    <button onclick="setStatusFilter('all')">All</button>
+                                    <button onclick="setStatusFilter('active')">Active Only</button>
+                                    <button onclick="setStatusFilter('returned')">Returned Only</button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -317,11 +324,12 @@
     </div>
 
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtvGNH_sZ9ekSzB1SS0rjo1m-uGPCcisyG8Nh6q8Lr-M-6wx3Fk-PaTyANMlIzGc4_bQ/exec"; // Replace with your actual URL if needed
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwtvGNH_sZ9ekSzB1SS0rjo1m-uGPCcisyG8Nh6q8Lr-M-6wx3Fk-PaTyANMlIzGc4_bQ/exec";
 
     let allEntries = [];
     let curNameSort = 'none';
     let curAmtSort = 'none';
+    let curStatusFilter = 'all';
 
     window.addEventListener('DOMContentLoaded', fetchData);
 
@@ -368,9 +376,17 @@
         applyFilters();
     }
 
+    function setStatusFilter(status) {
+        curStatusFilter = status;
+        applyFilters();
+    }
+
     function applyFilters() {
         let list = [...allEntries];
         
+        if(curStatusFilter === 'active') list = list.filter(e => e.status !== "Returned");
+        if(curStatusFilter === 'returned') list = list.filter(e => e.status === "Returned");
+
         let q = document.getElementById('searchName').value.toLowerCase().trim();
         if(q) list = list.filter(e => e.name.toLowerCase().includes(q));
 
