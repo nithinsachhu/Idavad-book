@@ -421,11 +421,7 @@
         m.style.display = m.style.display === 'block' ? 'none' : 'block';
     }
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('data:text/javascript;base64,').catch(() => {});
-        });
-    }
+    
 
     function updateStatus(rIdx, newSt) {
         fetch(WEB_APP_URL, {
