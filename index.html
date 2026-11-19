@@ -66,21 +66,17 @@
         .tab-view { display: none; }
         .tab-view.active { display: block; }
 
-       .controls-row {
+        .controls-row {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
-            position: sticky;
-            top: 0;
-            background: var(--cds-layer);
-            z-index: 10;
-            padding-bottom: 6px;
         }
-        .search-field { flex: 1; position: relative; }
+        .search-field { flex: 2; position: relative; }
+        .status-field { flex: 1.2; position: relative; }
         .controls-row input {
             width: 100%;
             height: 38px;
-            padding: 0px 8px 0px 32px;
+            padding: 0 8px 0 30px;
             border: 1px solid var(--cds-border-subtle);
             font-size: 12px;
             background: #f4f4f4;
@@ -88,7 +84,18 @@
             outline: none;
             border-radius: 4px;
         }
-        .search-field i {
+        .controls-row select {
+            width: 100%;
+            height: 38px;
+            padding: 0 8px 0 30px;
+            border: 1px solid var(--cds-border-subtle);
+            font-size: 12px;
+            background: #f4f4f4;
+            color: var(--cds-text-primary);
+            outline: none;
+            border-radius: 4px;
+        }
+        .search-field i, .status-field i {
             position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
             color: var(--cds-text-secondary); font-size: 12px;
         }
@@ -107,21 +114,16 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 10px;
-            position: sticky;
-            top: 0;
             border-bottom: 1px solid var(--cds-border-subtle);
-            z-index: 5;
         }
         td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
-        
-        /* Numbering aligned left with proper equal spacing */
+
         .num-col {
-            width: 35px;
+            width: 24px;
             font-size: 13px !important;
             font-weight: 500 !important;
             color: var(--cds-text-secondary);
-            text-align: left;
-            padding-left: 10px !important;
+            padding-right: 4px !important;
         }
 
         .name-text {
@@ -239,7 +241,7 @@
 <body>
 
     <div class="app-bar">
-        <h2><i class="fa-solid fa-wallet"></i> Ponni Wedding Idavad Book</h2>
+        <h2><i class="fa-solid fa-wallet"></i> Idavad Book </h2>
         <div class="app-total">
             <span>Total</span>
             <h1 id="grantTotalDisplay">₹0</h1>
@@ -251,7 +253,15 @@
             <div class="controls-row">
                 <div class="search-field">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchName" placeholder="Search contributor..." oninput="applyFilters()">
+                    <input type="text" id="searchName" placeholder="Search..." oninput="applyFilters()">
+                </div>
+                <div class="status-field">
+                    <i class="fa-solid fa-filter"></i>
+                    <select id="statusFilter" onchange="applyFilters()">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="returned">Returned</option>
+                    </select>
                 </div>
             </div>
 
@@ -259,7 +269,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 35px; padding-left: 10px;">#</th>
+                            <th style="width: 24px; padding-right: 4px;">#</th>
                             <th>
                                 <div class="th-sort" onclick="toggleSortPop(event, 'namePop')">
                                     NAME <i class="fa-solid fa-sort" style="font-size:8px;"></i>
@@ -280,16 +290,7 @@
                                     <button onclick="setSort('amount', 'none')">Default</button>
                                 </div>
                             </th>
-                            <th style="width: 40px; text-align: right;">
-                                <div class="th-sort" onclick="toggleSortPop(event, 'actPop')" style="justify-content: flex-end;">
-                                    <i class="fa-solid fa-filter" style="font-size:10px;"></i>
-                                </div>
-                                <div class="sort-pop" id="actPop" style="left: auto; right: 0;">
-                                    <button onclick="setStatusFilter('all')">All</button>
-                                    <button onclick="setStatusFilter('active')">Active Only</button>
-                                    <button onclick="setStatusFilter('returned')">Returned Only</button>
-                                </div>
-                            </th>
+                            <th style="width: 35px; text-align: right;">ACT</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -334,7 +335,6 @@
     let allEntries = [];
     let curNameSort = 'none';
     let curAmtSort = 'none';
-    let curStatusFilter = 'all';
 
     window.addEventListener('DOMContentLoaded', fetchData);
 
@@ -381,16 +381,12 @@
         applyFilters();
     }
 
-    function setStatusFilter(status) {
-        curStatusFilter = status;
-        applyFilters();
-    }
-
     function applyFilters() {
         let list = [...allEntries];
+        let status = document.getElementById('statusFilter').value;
         
-        if(curStatusFilter === 'active') list = list.filter(e => e.status !== "Returned");
-        if(curStatusFilter === 'returned') list = list.filter(e => e.status === "Returned");
+        if(status === 'active') list = list.filter(e => e.status !== "Returned");
+        if(status === 'returned') list = list.filter(e => e.status === "Returned");
 
         let q = document.getElementById('searchName').value.toLowerCase().trim();
         if(q) list = list.filter(e => e.name.toLowerCase().includes(q));
