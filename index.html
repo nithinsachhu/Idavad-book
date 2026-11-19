@@ -57,34 +57,34 @@
 
         .app-content {
             flex: 1;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             padding: 10px;
             background: var(--cds-layer);
             padding-bottom: 65px;
         }
 
         .tab-view { display: none; }
-        .tab-view.active { display: block; }
+        .tab-view.active {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+        #graphTab.tab-view.active {
+            overflow-y: auto;
+        }
 
         .controls-row {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
+            flex-shrink: 0;
         }
         .search-field { flex: 2; position: relative; }
         .status-field { flex: 1.2; position: relative; }
-        .controls-row input {
-            width: 100%;
-            height: 38px;
-            padding: 0 8px 0 30px;
-            border: 1px solid var(--cds-border-subtle);
-            font-size: 12px;
-            background: #f4f4f4;
-            color: var(--cds-text-primary);
-            outline: none;
-            border-radius: 4px;
-        }
-        .controls-row select {
+        .controls-row input, .controls-row select {
             width: 100%;
             height: 38px;
             padding: 0 8px 0 30px;
@@ -103,27 +103,39 @@
         .table-wrap {
             border: 1px solid var(--cds-border-subtle);
             border-radius: 4px;
-            overflow-x: auto;
+            overflow: auto;
+            flex: 1;
+            min-height: 0;
+            position: relative;
         }
 
         table { width: 100%; border-collapse: collapse; text-align: left; min-width: 280px; }
-        th, td { padding: 10px 8px; }
+        th, td { padding: 10px 6px; }
         th {
             background-color: #f4f4f4;
             color: var(--cds-text-secondary);
             font-weight: 600;
             text-transform: uppercase;
             font-size: 10px;
+            position: sticky;
+            top: 0;
             border-bottom: 1px solid var(--cds-border-subtle);
+            z-index: 15;
         }
         td { border-bottom: 1px solid var(--cds-border-subtle); background: var(--cds-layer); }
 
         .num-col {
-            width: 24px;
+            width: 26px;
             font-size: 13px !important;
             font-weight: 500 !important;
             color: var(--cds-text-secondary);
-            padding-right: 4px !important;
+            text-align: center;
+            padding-right: 2px !important;
+            padding-left: 2px !important;
+        }
+
+        td:nth-child(2), th:nth-child(2) {
+            padding-left: 4px;
         }
 
         .name-text {
@@ -155,7 +167,7 @@
         .sort-pop {
             display: none; position: absolute; left: 0; top: 100%; background: #fff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--cds-border-subtle);
-            z-index: 20; min-width: 120px; border-radius: 4px;
+            z-index: 30; min-width: 120px; border-radius: 4px;
         }
         .sort-pop button {
             width: 100%; padding: 8px; text-align: left; background: none; border: none;
@@ -241,7 +253,7 @@
 <body>
 
     <div class="app-bar">
-        <h2><i class="fa-solid fa-wallet"></i> Ponni Wedding Idavad Book </h2>
+        <h2><i class="fa-solid fa-wallet"></i> Idavad Book </h2>
         <div class="app-total">
             <span>Total</span>
             <h1 id="grantTotalDisplay">₹0</h1>
@@ -269,7 +281,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 24px; padding-right: 4px;">#</th>
+                            <th style="width: 26px; text-align: center; padding-right: 2px; padding-left: 2px;">#</th>
                             <th>
                                 <div class="th-sort" onclick="toggleSortPop(event, 'namePop')">
                                     NAME <i class="fa-solid fa-sort" style="font-size:8px;"></i>
@@ -364,10 +376,13 @@
     }
 
     function toggleSortPop(e, popId) {
+        e.preventDefault();
         e.stopPropagation();
         document.querySelectorAll('.sort-pop').forEach(p => { if(p.id !== popId) p.style.display = 'none'; });
         let pop = document.getElementById(popId);
-        pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
+        if (pop) {
+            pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
+        }
     }
 
     window.addEventListener('click', () => {
@@ -376,8 +391,14 @@
     });
 
     function setSort(type, order) {
-        if(type === 'name') { curNameSort = order; curAmtSort = 'none'; }
-        else { curAmtSort = order; curNameSort = 'none'; }
+        if(type === 'name') {
+            curNameSort = order;
+            curAmtSort = 'none';
+        } else if (type === 'amount') {
+            curAmtSort = order;
+            curNameSort = 'none';
+        }
+        document.querySelectorAll('.sort-pop').forEach(p => p.style.display = 'none');
         applyFilters();
     }
 
@@ -389,12 +410,20 @@
         if(status === 'returned') list = list.filter(e => e.status === "Returned");
 
         let q = document.getElementById('searchName').value.toLowerCase().trim();
-        if(q) list = list.filter(e => e.name.toLowerCase().includes(q));
+        if(q) list = list.filter(e => String(e.name || '').toLowerCase().includes(q));
 
-        if(curNameSort === 'atoz') list.sort((a,b) => a.name.localeCompare(b.name));
-        if(curNameSort === 'ztoa') list.sort((a,b) => b.name.localeCompare(a.name));
-        if(curAmtSort === 'lowtohigh') list.sort((a,b) => a.amount - b.amount);
-        if(curAmtSort === 'hightolow') list.sort((a,b) => b.amount - a.amount);
+        if(curNameSort === 'atoz') {
+            list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' }));
+        }
+        if(curNameSort === 'ztoa') {
+            list.sort((a, b) => String(b.name || '').localeCompare(String(a.name || ''), undefined, { sensitivity: 'base' }));
+        }
+        if(curAmtSort === 'lowtohigh') {
+            list.sort((a, b) => Number(a.amount || 0) - Number(b.amount || 0));
+        }
+        if(curAmtSort === 'hightolow') {
+            list.sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0));
+        }
 
         renderTable(list);
     }
@@ -416,7 +445,7 @@
                     <span class="name-text">${item.name}</span>
                     ${ret ? '<br><span style="font-size:9px; background:#ffd7d9; color:#750e13; padding:1px 4px; font-weight:600; border-radius:2px;">Returned</span>' : ''}
                 </td>
-                <td><span class="amount-tag">₹${item.amount.toLocaleString()}</span></td>
+                <td><span class="amount-tag">₹${Number(item.amount || 0).toLocaleString()}</span></td>
                 <td style="text-align:right;">
                     <div class="menu-box">
                         <button class="dots-btn" onclick="toggleMenu(event, ${item.rowIndex})"><i class="fa-solid fa-ellipsis-vertical"></i></button>
